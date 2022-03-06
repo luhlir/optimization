@@ -1,12 +1,20 @@
 import numpy as np
 
 
-# This function returns 2 constants, ensuring a local min on f(x) is enclosed
-def bracket_minimum(f, step=1, growth=2, max_steps=10):
+def bracket_minimum(f, step=1, growth=2, max_steps=20):
+    """Guarantees a local min of f is between the returned values. Does not guarantee a small bracket.
+
+    :param f: Function takes a constant input and returns a constant output
+    :param step: Initial step size
+    :param growth: Growth factor by which the step increases
+    :param max_steps: Maximum number of function calls, in case no local min exists (>2)
+    :return: Tuple with 2 values that bracket a local min of f
+    """
     a = 0
     b = step
     c = 0
     ya, yb = f(a), f(b)
+    max_steps -= 2
     if ya < yb:
         temp = a
         a = b
@@ -26,28 +34,51 @@ def bracket_minimum(f, step=1, growth=2, max_steps=10):
     return a, c
 
 
-def golden_section_search(f, a, b, n=10):
+def golden_section_search(f, lower, upper, steps=10):
+    """Uses the golden ration to shrink the bracket at each step
+
+    :param f: Function that takes a constant input and returns a constant output
+    :param lower: Constant lower bound of bracket
+    :param upper: Constant upper bound of bracket
+    :param steps: Number of function calls (>1)
+    :return: Tuple with 2 values that bracket a local min of f
+    """
     p = 0.61803    # golden ration - 1
-    d = p * b + (1 - p) * a
-    while n > 0:
-        c = p * a + (1 - p) * b
-        if f(c) < f(d):
-            b = d
+    d = p * upper + (1 - p) * lower
+    yd = f(d)
+    steps -= 1
+    while steps > 0:
+        c = p * lower + (1 - p) * upper
+        yc = f(c)
+        if yc < yd:
+            upper = d
             d = c
+            yd = yc
         else:
-            a = b
-            b = c
-        n -= 1
-    return a, b
+            lower = upper
+            upper = c
+        steps -= 1
+    return lower, upper
 
 
-# a < b < c
-def quadratic_fit_search(f, a, b, c=None, n=10):
+def quadratic_fit_search(f, a, b, c=None, steps=10):
+    """Interpolates a quadratic function around a, b, and c and brackets that min.
+
+    a < b (< c if it is not None)
+
+    :param f: Function that takes a constant input and returns a constant output
+    :param a: Point around local min
+    :param b: Point around local min (> a)
+    :param c: Point around local min (> b), defaults to midpoint of a and b
+    :param steps: Number of function calls (>3)
+    :return: Tuple with 2 values that bracket a local min of f
+    """
     if c is None:
         c = b
         b = (a + c) / 2
     ya, yb, yc = f(a), f(b), f(c)
-    while n > 0:
+    steps -= 3
+    while steps > 0:
         x = ya * (b ** 2 - c ** 2) + yb * (c ** 2 - a ** 2) + yc * (a ** 2 - b ** 2)
         x /= ya * (b - c) + yb * (c - a) + yc * (a - b)
         x /= 2
@@ -64,6 +95,6 @@ def quadratic_fit_search(f, a, b, c=None, n=10):
                 c, yc, b, yb = b, yb, x, yx
         else:
             break
-        n -= 1
+        steps -= 1
     return a, c
 
