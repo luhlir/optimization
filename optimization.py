@@ -1,6 +1,7 @@
 import firstOrderMethods as fom
 import secondOrderMethods as som
 import zeroOrderMethods as zom
+import stochasticMethods as stm
 
 
 def optimize(f, x_0, f_args=None, opt_method="newtons_method", opt_args=None):
@@ -39,4 +40,20 @@ def optimize(f, x_0, f_args=None, opt_method="newtons_method", opt_args=None):
         return zom.hooke_jeeves_method(f, x_0, f_args, **opt_args)
     elif opt_method == "pattern_search":
         return zom.pattern_search(f, x_0, f_args, **opt_args)
+    elif opt_method == "nelder_mead_simplex":
+        return zom.nelder_mead_simplex(f, f_args, x_0=x_0, **opt_args)
+    elif opt_method == "divided_rectangles":
+        return zom.divided_rectangles(f, f_args, **opt_args)
+    elif opt_method == "noisy_descent":
+        return stm.noisy_descent(f, x_0, f_args, **opt_args)
+    elif opt_method == "mesh_adaptive_search":
+        return stm.mesh_adaptive_search(f, x_0, f_args, **opt_args)
+    elif opt_method == "simulated_annealing":
+        return stm.simulated_annealing(f, x_0, f_args, **opt_args)
+    elif opt_method == "corana_annealing":
+        return stm.corana_annealing(f, x_0, f_args, **opt_args)
+    elif opt_method == "cross_entropy":
+        return stm.cross_entropy(f, f_args, x_0=x_0, **opt_args)
+    elif opt_method == "covariance_matrix_adaptation":
+        return stm.covariance_matrix_adaptation(f, x_0, f_args, **opt_args)
     return x_0
