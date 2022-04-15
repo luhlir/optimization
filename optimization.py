@@ -2,6 +2,7 @@ import firstOrderMethods as fom
 import secondOrderMethods as som
 import zeroOrderMethods as zom
 import stochasticMethods as stm
+import populationMethods as pop
 
 
 def optimize(f, x_0, f_args=None, opt_method="newtons_method", opt_args=None):
@@ -56,4 +57,14 @@ def optimize(f, x_0, f_args=None, opt_method="newtons_method", opt_args=None):
         return stm.cross_entropy(f, f_args, x_0=x_0, **opt_args)
     elif opt_method == "covariance_matrix_adaptation":
         return stm.covariance_matrix_adaptation(f, x_0, f_args, **opt_args)
+    elif opt_method == "genetic_method":
+        return pop.genetic_method(f, f_args, x_0=x_0, **opt_args)
+    elif opt_method == "differential_evolution":
+        return pop.differential_evolution(f, f_args, x_0=x_0, **opt_args)
+    elif opt_method == "particle_swarm":
+        return pop.particle_swarm(f, f_args, x_0=x_0, **opt_args)
+    elif opt_method == "firefly_method":
+        return pop.firefly_method(f, f_args, x_0=x_0, **opt_args)
+    elif opt_method == "cuckoo_search":
+        return pop.cuckoo_search(f, f_args, x_0=x_0, **opt_args)
     return x_0
