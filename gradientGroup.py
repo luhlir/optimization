@@ -4,8 +4,8 @@ import numpy as np
 class GradientGroup:
 
     def __init__(self, val, gradients):
-        self.val = val
-        self.gradients = np.array(gradients)
+        self.val = val * 1.0
+        self.gradients = np.array(gradients) * 1.0
         self.gradients = self.gradients.reshape((self.gradients.size, 1))
 
 

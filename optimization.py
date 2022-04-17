@@ -3,13 +3,10 @@ import secondOrderMethods as som
 import zeroOrderMethods as zom
 import stochasticMethods as stm
 import populationMethods as pop
+import constraintMethods as con
 
 
-def optimize(f, x_0, f_args=None, opt_method="newtons_method", opt_args=None):
-    if f_args is None:
-        f_args = {}
-    if opt_args is None:
-        opt_args = {}
+def optimize(f, x_0, f_args={}, opt_method="newtons_method", **opt_args):
 
     if opt_method == "gradient_descent":
         return fom.gradient_descent(f, x_0, f_args, **opt_args)
@@ -67,4 +64,12 @@ def optimize(f, x_0, f_args=None, opt_method="newtons_method", opt_args=None):
         return pop.firefly_method(f, f_args, x_0=x_0, **opt_args)
     elif opt_method == "cuckoo_search":
         return pop.cuckoo_search(f, f_args, x_0=x_0, **opt_args)
+    elif opt_method == "hyperrectangle_contraint":
+        return con.hyperrectangle_constraint(f, x_0, f_args, **opt_args)
+    elif opt_method == "penalty_constraint":
+        return con.penalty_constraint(f, x_0, f_args, **opt_args)
+    elif opt_method == "augmented_lagrange":
+        return con.augmented_lagrange(f, x_0, f_args, **opt_args)
+    elif opt_method == "interior_point_method":
+        return con.interior_point_method(f, x_0, f_args, **opt_args)
     return x_0

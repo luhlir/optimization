@@ -20,7 +20,10 @@ def gradient_descent(f, x_0, f_args, f_prime=None, fp_args=None, auto_diff=True,
             grad = f(gg.make_gradient_groups(x_curr), **f_args).gradients.flatten()
         else:
             grad = f_prime(x_curr, **fp_args)
-        d = -grad / np.linalg.norm(grad)
+        grad_norm = np.linalg.norm(grad)
+        if grad_norm == 0:
+            grad_norm = 1
+        d = -grad / grad_norm
         x_curr = ls.line_search(f, x_curr, f_args, d, method=lin_method, lin_args=lin_args)
     return x_curr
 
