@@ -3,8 +3,18 @@ import bracket
 from gradientGroup import GradientGroup as gg
 
 
-# Returns a new design point in the direction d from x
 def line_search(f, x, f_args, d, method="strong_backtrack_search", lin_args=None):
+    """
+    Performs the input line search method
+
+    :param f: objective function to search
+    :param x: design point to search around
+    :param f_args: dictionary of immutable arguments for the objective function
+    :param d: direction to search in
+    :param method: line search method
+    :param lin_args: dictionary of immutable arguments for the line search method
+    :return: a good candidate design point satisfying x' = x + a * d
+    """
     if len(x) != len(d):
         return x
     if lin_args is None:
@@ -25,9 +35,19 @@ def line_search(f, x, f_args, d, method="strong_backtrack_search", lin_args=None
     return x + a * d
 
 
-# TODO: implement a full line search using bracketing methods
-# Searches the 1D function of f(x + z*d) to find best step size of a
 def full_search(f, x, f_args, d, brac_method="golden_section_search", brac_args=None, min_args=None):
+    """
+    Performs a full search using a bracketing method to detect a local minimum on the given line
+
+    :param f: objective function to search
+    :param x: initial design point
+    :param f_args: dictionary of immutable arguments for the objective function
+    :param d: direction of line to search
+    :param brac_method: bracketing method to use in the search
+    :param brac_args: dictionary of immutable arguments for the bracketing method
+    :param min_args: dictionary of immutable arguments for determining a good initial guess
+    :return: a scalar describing the step size to take in the given direction
+    """
     if brac_args is None:
         brac_args = {}
     if min_args is None:
@@ -46,23 +66,49 @@ def full_search(f, x, f_args, d, brac_method="golden_section_search", brac_args=
     return (y + z) / 2
 
 
-# Fixed step takes the same step every time
 def fix_search(alpha):
+    """
+    Redundant.. returns the input. Fixed step size
+
+    :param alpha: step size
+    :return: scalar describing the step size to take in the given direction
+    """
     return alpha
 
 
 global k
 
 
-# Decaying step takes a smaller step every time
 def decaying_search(alpha, decay):
+    """
+    Decreases the step size at each step
+
+    :param alpha: initial step size
+    :param decay: scalar to decrease step size by at each step
+    :return: scalar describing the step size to take in the given direction
+    """
     k += 1
-    return alpha * (decay ** k)   # Better way to do this
+    return alpha * (decay ** k)   # TODO: Better way to do this? <--- pass in the step size as an argument. use dictionary in upper levels
 
 
-# Backtracking search, find spot where function is at most what we expect from gradient
 def backtrack_search(f, x, f_args, d, f_prime=None, fp_args=None, auto_diff=True, alpha=1, p=0.5, beta=0.0001,
                      max_steps=20):
+    """
+    Uses function values to find point that is likely to be minimal on the line based on the gradient
+
+    :param f: function to evaluate
+    :param x: starting point for search
+    :param f_args: dictionary of immutable arguments to f
+    :param d: direction vector to search in
+    :param f_prime: gradient method of f
+    :param fp_args: dictionary of immutable arguments to f_prime
+    :param auto_diff: use automatic differentiation instead of an explicit gradient method
+    :param alpha: initial step size
+    :param p: step size correction factor <1 used at each step
+    :param beta: scalar for expected change in function value
+    :param max_steps: maximum number of function evaluations to take
+    :return: scalar describing the step size to take in the given direction
+    """
     if p > 1:
         p = 1 / p
     if fp_args is None:
@@ -84,9 +130,25 @@ def backtrack_search(f, x, f_args, d, f_prime=None, fp_args=None, auto_diff=True
     return alpha
 
 
-# Strong backtracking using the strong Wolfe conditions
 def strong_backtrack_search(f, x, f_args, d, f_prime=None, fp_args=None, auto_diff=True, alpha=1, p=0.5, beta=0.0001,
                             sig=0.1, max_steps=20):
+    """
+    Performs a backtrack search that uses the strong Wolfe conditions to detect a local minimum on the line
+
+    :param f: function to evaluate
+    :param x: starting point for search
+    :param f_args: dictionary of immutable arguments to f
+    :param d: direction vector to search in
+    :param f_prime: gradient method of f
+    :param fp_args: dictionary of immutable arguments to f_prime
+    :param auto_diff: use automatic differentiation instead of an explicit gradient method
+    :param alpha: initial step size
+    :param p: step size correction factor <1 used at each step in bracketing phase
+    :param beta: scalar for expected change in function value
+    :param sig: scalar used in zoom phase
+    :param max_steps: maximum number of function calls to make
+    :return: scalar describing the step size to take in the given direction
+    """
     if p < 1:
         p = 1 / p
     if max_steps <= 0:

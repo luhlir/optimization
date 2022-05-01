@@ -5,6 +5,21 @@ import lineSearch as ls
 
 def gradient_descent(f, x_0, f_args, f_prime=None, fp_args=None, auto_diff=True, max_steps=50,
                      tol=0.00001, lin_method="strong_backtrack_search", lin_args=None):
+    """
+    Uses a simple gradient of the objective function to decide which direction to step in
+
+    :param f: objective function
+    :param x_0: starting design point
+    :param f_args: dictionary of immutable arguments for the objective function
+    :param f_prime: gradient of the objective function
+    :param fp_args: dictionary of immutable arguments for the gradient function
+    :param auto_diff: if True, will not use gradient function and will use automatic differentiation instead
+    :param max_steps: maximum number of steps to take before returning
+    :param tol: necessary distance to travel at each step before returning
+    :param lin_method: line search method used to determine step size
+    :param lin_args: dictionary of immutable arguments for the line search function
+    :return: a likely locally minimal design point
+    """
     if fp_args is None:
         fp_args = {}
     if lin_args is None:
@@ -30,6 +45,22 @@ def gradient_descent(f, x_0, f_args, f_prime=None, fp_args=None, auto_diff=True,
 
 def conjugate_descent(f, x_0, f_args, f_prime=None, fp_args=None, auto_diff=True, beta_method="polak-ribiere",
                       max_steps=50, tol=0.00001, lin_method="strong_backtrack_search", lin_args=None):
+    """
+    Uses previous gradient information to determine which direction to search
+
+    :param f: objective function
+    :param x_0: starting design point
+    :param f_args: dictionary of immutable arguments for the objective function
+    :param f_prime: gradient of the objective function
+    :param fp_args: dictionary of immutable arguments for the gradient function
+    :param auto_diff: if True, will not use gradient function and will use automatic differentiation instead
+    :param beta_method: "polak-ribiere" or "fletcher-reeves" for adding previous gradient information to direction
+    :param max_steps: maximum number of steps to take before returning
+    :param tol: necessary distance to travel at each step before returning
+    :param lin_method: line search method used to determine step size
+    :param lin_args: dictionary of immutable arguments for the line search function
+    :return: a likely locally minimal design point
+    """
     if fp_args is None:
         fp_args = {}
     if lin_args is None:
@@ -62,6 +93,21 @@ def conjugate_descent(f, x_0, f_args, f_prime=None, fp_args=None, auto_diff=True
 
 def momentum_descent(f, x_0, f_args, f_prime=None, fp_args=None, auto_diff=True, alpha=0.01, beta=0.01,
                      max_steps=50, tol=0.00001):
+    """
+    Updates a momentum vector with gradient information to determine direction and size of each step
+
+    :param f: objective function
+    :param x_0: starting design point
+    :param f_args: dictionary of immutable arguments for the objective function
+    :param f_prime: gradient of the objective function
+    :param fp_args: dictionary of immutable arguments for the gradient function
+    :param auto_diff: if True, will not use gradient function and will use automatic differentiation instead
+    :param alpha: scalar for current gradient
+    :param beta: scalar for previous momentum
+    :param max_steps: maximum number of steps to take before returning
+    :param tol: necessary distance to travel at each step before returning
+    :return: a likely locally minimal design point
+    """
     if fp_args is None:
         fp_args = {}
     v = np.zeros(len(x_0))
@@ -86,6 +132,21 @@ def momentum_descent(f, x_0, f_args, f_prime=None, fp_args=None, auto_diff=True,
 
 def nesterov_descent(f, x_0, f_args, f_prime=None, fp_args=None, auto_diff=True, alpha=0.01, beta=0.01,
                      max_steps=50, tol=0.00001):
+    """
+    Updates a momentum vector with future gradient information to determine direction and size of each step
+
+    :param f: objective function
+    :param x_0: starting design point
+    :param f_args: dictionary of immutable arguments for the objective function
+    :param f_prime: gradient of the objective function
+    :param fp_args: dictionary of immutable arguments for the gradient function
+    :param auto_diff: if True, will not use gradient function and will use automatic differentiation instead
+    :param alpha: scalar for future gradient
+    :param beta: scalar for previous momentum
+    :param max_steps: maximum number of steps to take before returning
+    :param tol: necessary distance to travel at each step before returning
+    :return: a likely locally minimal design point
+    """
     if fp_args is None:
         fp_args = {}
     v = np.zeros(len(x_0))
@@ -109,6 +170,20 @@ def nesterov_descent(f, x_0, f_args, f_prime=None, fp_args=None, auto_diff=True,
 
 
 def adagrad_descent(f, x_0, f_args, f_prime=None, fp_args=None, auto_diff=True, alpha=0.01, max_steps=50, tol=0.00001):
+    """
+    Updates a momentum vector with squared gradient to determine direction and size of each step
+
+    :param f: objective function
+    :param x_0: starting design point
+    :param f_args: dictionary of immutable arguments for the objective function
+    :param f_prime: gradient of the objective function
+    :param fp_args: dictionary of immutable arguments for the gradient function
+    :param auto_diff: if True, will not use gradient function and will use automatic differentiation instead
+    :param alpha: scalar for momentum and gradient toward step size
+    :param max_steps: maximum number of steps to take before returning
+    :param tol: necessary distance to travel at each step before returning
+    :return: a likely locally minimal design point
+    """
     if fp_args is None:
         fp_args = {}
     s = np.zeros(len(x_0))
@@ -133,6 +208,21 @@ def adagrad_descent(f, x_0, f_args, f_prime=None, fp_args=None, auto_diff=True, 
 
 def rmsprop_descent(f, x_0, f_args, f_prime=None, fp_args=None, auto_diff=True, alpha=0.01, gamma=0.9,
                     max_steps=50, tol=0.00001):
+    """
+    Updates a momentum vector using a weighted sum of previous momentum and gradient information to determine direction and size of each step
+
+    :param f: objective function
+    :param x_0: starting design point
+    :param f_args: dictionary of immutable arguments for the objective function
+    :param f_prime: gradient of the objective function
+    :param fp_args: dictionary of immutable arguments for the gradient function
+    :param auto_diff: if True, will not use gradient function and will use automatic differentiation instead
+    :param alpha: scalar for momentum towards step size
+    :param gamma: scalar for weight of momentum in momentum update
+    :param max_steps: maximum number of steps to take before returning
+    :param tol: necessary distance to travel at each step before returning
+    :return: a likely locally minimal design point
+    """
     if fp_args is None:
         fp_args = {}
     s = np.zeros(len(x_0))
@@ -157,6 +247,21 @@ def rmsprop_descent(f, x_0, f_args, f_prime=None, fp_args=None, auto_diff=True, 
 
 def adadelta_descent(f, x_0, f_args, f_prime=None, fp_args=None, auto_diff=True, delta=0.9, gamma=0.9,
                      max_steps=50, tol=0.00001):
+    """
+    Updates a momenum vector with two weighted sums of gradients and momentums to determine direction and size of each step
+
+    :param f: objective function
+    :param x_0: starting design point
+    :param f_args: dictionary of immutable arguments for the objective function
+    :param f_prime: gradient of the objective function
+    :param fp_args: dictionary of immutable arguments for the gradient function
+    :param auto_diff: if True, will not use gradient function and will use automatic differentiation instead
+    :param delta: weight of previous step direction/size in step direction/size update
+    :param gamma: weight of previous momentum in momentum update
+    :param max_steps: maximum number of steps to take before returning
+    :param tol: necessary distance to travel at each step before returning
+    :return: a likely locally minimal design point
+    """
     if fp_args is None:
         fp_args = {}
     s = np.zeros(len(x_0))
@@ -185,6 +290,22 @@ def adadelta_descent(f, x_0, f_args, f_prime=None, fp_args=None, auto_diff=True,
 
 def adam_descent(f, x_0, f_args, f_prime=None, fp_args=None, auto_diff=True, alpha=0.001, delta=0.9, gamma=0.999,
                  max_steps=50, tol=0.00001):
+    """
+    Updates two momentum vectors that increase over time to determine direction and size of each step
+
+    :param f: objective function
+    :param x_0: starting design point
+    :param f_args: dictionary of immutable arguments for the objective function
+    :param f_prime: gradient of the objective function
+    :param fp_args: dictionary of immutable arguments for the gradient function
+    :param auto_diff: if True, will not use gradient function and will use automatic differentiation instead
+    :param alpha: scalar for momentum in step direction/size
+    :param delta: weight for current momentum in first momentum vector update
+    :param gamma: weight for current momentum in second momentum vector update
+    :param max_steps: maximum number of steps to take before returning
+    :param tol: necessary distance to travel at each step before returning
+    :return: a likely locally minimal design point
+    """
     if fp_args is None:
         fp_args = {}
     s = np.zeros(len(x_0))
@@ -215,6 +336,21 @@ def adam_descent(f, x_0, f_args, f_prime=None, fp_args=None, auto_diff=True, alp
 
 def hypergradient_descent(f, x_0, f_args, f_prime=None, fp_args=None, auto_diff=True, alpha=0.1, mu=0.001,
                           max_steps=50, tol=0.00001):
+    """
+    Uses previous gradient information to update scalar "alpha" to determine step size; steps in the direction of the gradient
+
+    :param f: objective function
+    :param x_0: starting design point
+    :param f_args: dictionary of immutable arguments for the objective function
+    :param f_prime: gradient of the objective function
+    :param fp_args: dictionary of immutable arguments for the gradient function
+    :param auto_diff: if True, will not use gradient function and will use automatic differentiation instead
+    :param alpha: initial step size value
+    :param mu: scalar used in step size update
+    :param max_steps: maximum number of steps to take before returning
+    :param tol: necessary distance to travel at each step before returning
+    :return: a likely locally minimal design point
+    """
     x_curr = np.array(x_0)
     x_prev = np.ones(len(x_0)) * np.inf
     grad_prev = np.zeros(len(x_0))
