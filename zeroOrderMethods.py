@@ -17,9 +17,9 @@ def batch_eval(f, X, f_args, multithreaded):
         y = pool.starmap(multiprocessing_eval, args)
         pool.close()
     else:
-        y = np.zeros(n)
+        y = []
         for i in range(n):
-            y[i] = f(X[i], **f_args)
+            y.append(f(X[i], **f_args))
     return y
 
 

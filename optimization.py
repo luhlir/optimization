@@ -4,9 +4,10 @@ import zeroOrderMethods as zom
 import stochasticMethods as stm
 import populationMethods as pop
 import constraintMethods as con
+import multiobjectiveMethods as mul
 
 
-def optimize(f, x_0, f_args={}, opt_method="newtons_method", **opt_args):
+def optimize(f, x_0, f_args={}, opt_method="gradient_descent", **opt_args):
 
     if opt_method == "gradient_descent":
         return fom.gradient_descent(f, x_0, f_args, **opt_args)
@@ -72,4 +73,22 @@ def optimize(f, x_0, f_args={}, opt_method="newtons_method", **opt_args):
         return con.augmented_lagrange(f, x_0, f_args, **opt_args)
     elif opt_method == "interior_point_method":
         return con.interior_point_method(f, x_0, f_args, **opt_args)
+    elif opt_method == "naive_pareto":
+        return mul.naive_pareto(f, f_args, x_0=x_0, **opt_args)
+    elif opt_method == "weighted_pareto_method":
+        return mul.weighted_pareto_method(f, x_0, f_args, **opt_args)
+    elif opt_method == "goal_method":
+        return mul.goal_method(f, x_0, f_args, **opt_args)
+    elif opt_method == "weighted_goal_method":
+        return mul.weighted_goal_method(f, x_0, f_args, **opt_args)
+    elif opt_method == "weighted_goal_scan_method":
+        return mul.weighted_goal_scan_method(f, x_0, f_args, **opt_args)
+    elif opt_method == "weighted_min_max_method":
+        return mul.weighted_min_max_method(f, x_0, f_args, **opt_args)
+    elif opt_method == "weighted_min_max_scan_method":
+        return mul.weighted_min_max_scan_method(f, x_0, f_args, **opt_args)
+    elif opt_method == "exponential_weight_method":
+        return mul.exponential_weight_method(f, x_0, f_args, **opt_args)
+    elif opt_method == "exponential_weight_scan_method":
+        return mul.exponential_weight_scan_method(f, x_0, f_args, **opt_args)
     return x_0
