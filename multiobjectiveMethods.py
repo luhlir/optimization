@@ -361,3 +361,19 @@ def exponential_weight_scan_method(f, x_0, f_args, obj_count, weight_step=0.1, p
                  "nested_opt_method": nested_opt_method,
                  "nested_opt_args": nested_opt_args}
     return scan_weights(weight_step, obj_count, exponential_weight_method, scan_args)
+
+
+def non_domination_levels(f, X, f_args, multithreaded=False):
+    vals = batch_eval(f, X, f_args, multithreaded)
+    levels = []
+    while len(X) > 0:
+        this_level = []
+        i = 0
+        while i < len(X):
+            if not any(dominates(vals[j], vals[i]) for j in range(len(X))):
+                this_level.append(X.pop(i))
+                vals.pop(i)
+            else:
+                i += 1
+        levels.append(this_level)
+    return levels

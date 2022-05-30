@@ -77,6 +77,8 @@ def optimize(f, x_0, f_args={}, opt_method="gradient_descent", **opt_args):
         return mul.naive_pareto(f, f_args, x_0=x_0, **opt_args)
     elif opt_method == "weighted_pareto_method":
         return mul.weighted_pareto_method(f, x_0, f_args, **opt_args)
+    elif opt_method == "weighted_pareto_scan_method":
+        return mul.weighted_pareto_scan_method(f, x_0, f_args, **opt_args)
     elif opt_method == "goal_method":
         return mul.goal_method(f, x_0, f_args, **opt_args)
     elif opt_method == "weighted_goal_method":
@@ -91,4 +93,6 @@ def optimize(f, x_0, f_args={}, opt_method="gradient_descent", **opt_args):
         return mul.exponential_weight_method(f, x_0, f_args, **opt_args)
     elif opt_method == "exponential_weight_scan_method":
         return mul.exponential_weight_scan_method(f, x_0, f_args, **opt_args)
+    elif opt_method == "vector_evaluated_genetic_method":
+        return pop.vector_evaluated_genetic_method(f, f_args, x_0=x_0, **opt_args)
     return x_0

@@ -493,3 +493,56 @@ def cuckoo_search(f, f_args, x_0=None, init_method="cauchy", variance=None,
         birds = roulette_selection(eggs, values, population_count)
         max_steps -= 1
     return best_x
+
+
+def vector_evaluated_genetic_method(f, f_args, x_0=None, init_method="cauchy", variance=None,
+                                    lower=None, upper=None, population_count=50, max_steps=50,
+                                    selection="truncation", selection_args={},
+                                    crossover="uniform", crossover_args={},
+                                    mutation="gaussian", mutation_args={}, multithreaded=False):
+    """
+    Multiobjective genetic evolution method to detect points along a likely Pareto frontier
+
+    :param f: objective function
+    :param f_args: dictionary of immutable arguments for the objective function
+    :param x_0: starting point for normal or cauchy distribution population initialization
+    :param init_method: method of population initialization around a point
+    :param variance: covariance matrix of array of variances in each dimension based on initialization method
+    :param lower: lower bounds used in uniform population initialization
+    :param upper: upper bounds used in uniform population initialization
+    :param population_count: number of sample to maintain at each step
+    :param max_steps: number of generations to use
+    :param selection: selection method to be used
+    :param selection_args: dictionary of arguments for selection method
+    :param crossover: crossover method to be used
+    :param crossover_args: dictionary of arguments for crossover method
+    :param mutation: mutation method to be used
+    :param mutation_args: dictionary of arguments for mutation method
+    :param multithreaded: whether the children of each generation are explored in parallel
+    :return: an array of points that form a likely Pareto frontier
+    """
+    if x_0 is not None:
+        if init_method == "normal":
+            points = random_normal(population_count, x_0, variance)
+        else:
+            points = random_cauchy(population_count, x_0, variance)
+    else:
+        points = random_uniform(population_count, lower, upper)
+    values = batch_eval(f, points, f_args, multithreaded)
+    obj_count = len(values[0])
+    subpop_count = int(population_count / obj_count)
+    while max_steps > 0:
+        parents = []
+        # Get the best subpopulation for each objective
+        for i in range(obj_count):
+            parents += genetic_selection(points, [value[i] for value in values],
+                                         subpop_count, selection, selection_args)
+        set1 = np.random.permutation(parents)
+        set2 = np.random.permutation(parents)
+        points = []
+        for i in range(len(set1)):
+            points.append(genetic_mutation(genetic_crossover(set1[i], set2[i], crossover, crossover_args),
+                                           mutation, mutation_args))
+        values = batch_eval(f, points, f_args, multithreaded)
+        max_steps -= 1
+    return np.array(points)
