@@ -188,7 +188,7 @@ def nelder_mead_simplex(f, f_args, S=None, x_0=None, side_0=1, reflect=1, expans
 
 
 def f_unit(f, x, f_args, interval_low, interval_high):
-    return f(x * (interval_high - interval_low) + interval_low, **f_args)
+    return f(x * np.subtract(interval_high, interval_low) + interval_low, **f_args)
 
 
 class Interval:
@@ -237,7 +237,7 @@ def divided_rectangles(f, f_args, interval_low, interval_high,
                        max_steps=50, size_tol=0.001, value_tol=0.001, multithreaded=False):
 
     def f_unit_inv(x):
-        return x * (interval_high - interval_low) + interval_low
+        return x * np.subtract(interval_high, interval_low) + interval_low
 
     if multithreaded:
         pool = multiprocessing.Pool(multiprocessing.cpu_count() - 1)
