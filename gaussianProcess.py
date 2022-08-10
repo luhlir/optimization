@@ -165,7 +165,7 @@ class GaussianProcess(object):
         third_part = np.matmul(self.theta, self.y - self.mean)
         return -(first_part + second_part + third_part) / 2
 
-    def fit_hyperparameters(self):
+    def fit_hyperparameters(self, suppress_output=False):
         """
         Performs gradient descent to maximize the log-likelihood estimate
 
@@ -177,12 +177,14 @@ class GaussianProcess(object):
                                       auto_diff=False, lin_args={"f_prime": GaussianProcess.fit_log_likelihood_gradient,
                                                                  "fp_args": {"gp": self}, "auto_diff": False})
         length_scale, variance, power, bessel_order = x_fit
-        print("New hyperparameters: \n\tlength_scale=" + str(length_scale) + "\n\tvariance=" + str(variance) +
-              "\n\tpower=" + str(power) + "\n\tbessel_order=" + str(bessel_order))
+        if not suppress_output:
+            print("New hyperparameters: \n\tlength_scale=" + str(length_scale) + "\n\tvariance=" + str(variance) +
+                  "\n\tpower=" + str(power) + "\n\tbessel_order=" + str(bessel_order))
         gp = GaussianProcess(self.x, self.y, self.f_mean.__name__, self.mean_offset, self.f_kernel.__name__,
                              self.noise_var, length_scale, variance=variance, power=power, bessel_order=bessel_order)
-        print("Improvements: \n\told log-likelihood=" + str(self.log_likelihood()) +
-              "\n\tnew log-likelihood=" + str(gp.log_likelihood()))
+        if not suppress_output:
+            print("Improvements: \n\told log-likelihood=" + str(self.log_likelihood()) +
+                  "\n\tnew log-likelihood=" + str(gp.log_likelihood()))
         return gp
 
     def prediction_based(self, x):
@@ -316,3 +318,53 @@ class GaussianProcess(object):
             gradients[i] = trace - np.matmul(np.matmul(pre, sel_grad), post)
 
         return gradients / 2
+
+    # TODO: Implement Safe Optimization technique (pg 296)
+
+
+def auto_gaussian_process(f, f_args, x, y=None, lower=None, upper=None, exploration_method="expected_improv", steps=100,
+                          mean_func="zero_mean", mean_offset=0, kernel_func="squared_exponential", noise_var=0,
+                          length_scale=1, variance=1, power=1, bessel_order=1, fit_hyperparameters=False, alpha=0.5):
+    """
+    Creates and explores a Gaussian Process to detect a likely minimum in the provided interval. Can be useful if the objective function is inefficient and the search space is sufficiently small.
+
+    :param f: objective function
+    :param f_args: immutable arguments for the objective function
+    :param x: 2D array of known design points (can be 1D for a single point)
+    :param y: 1D array of known function values at x (defaults to evaluated values of x)
+    :param lower: lower bound of exploration (default to minimum of x)
+    :param upper: upper bound of exploration (default to maximum of x)
+    :param exploration_method: hueristic to use in determining which points to explore
+    :param steps: number of points to explore before terminating
+    :param mean_func: mean function for building the gaussian process
+    :param mean_offset: argument for the 'zero_mean' mean function
+    :param kernel_func: kernel function for building the gaussian process
+    :param noise_var: variance of inherent noise in function values
+    :param length_scale: initial length scale of gaussian process
+    :param variance: initial variance used in some kernels of gaussian process
+    :param power: initial power used in some kernels of gaussian process
+    :param bessel_order: initial bessel_order used in some kernels of gaussian process
+    :param fit_hyperparameters: whether to fit the hyperparameters for kernels at each step
+    :param alpha: scalar used in 'lower_confidence' exploration method
+    :return: a likely minimum of the objective function in the provided interval
+    """
+    if len(np.shape(x)) != 2:
+        x = np.reshape(x, (1, len(x)))
+    if y is None:
+        y = np.zeros(len(x))
+        for i in range(len(x)):
+            y[i] = f(x, **f_args)
+    if lower in None:
+        lower = np.min(x, axis=0)
+    if upper is None:
+        upper = np.max(x, axis=0)
+    gp = GaussianProcess(x, y, mean_func, mean_offset, kernel_func, noise_var, length_scale,
+                         variance=variance, power=power, bessel_order=bessel_order)
+    while steps > 0:
+        if fit_hyperparameters:
+            gp.fit_hyperparameters(suppress_output=True)
+        new_point = gp.explore_point(exploration_method, lower, upper, alpha=alpha)
+        new_value = f(new_point, **f_args)
+        gp = gp.add_points([new_point], [new_value])
+        steps -= 1
+    return gp.x_min

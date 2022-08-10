@@ -5,6 +5,7 @@ import stochasticMethods as stm
 import populationMethods as pop
 import constraintMethods as con
 import multiobjectiveMethods as mul
+import gaussianProcess as gp
 
 
 def optimize(f, x_0, f_args={}, opt_method="gradient_descent", **opt_args):
@@ -95,4 +96,6 @@ def optimize(f, x_0, f_args={}, opt_method="gradient_descent", **opt_args):
         return mul.exponential_weight_scan_method(f, x_0, f_args, **opt_args)
     elif opt_method == "vector_evaluated_genetic_method":
         return pop.vector_evaluated_genetic_method(f, f_args, x_0=x_0, **opt_args)
+    elif opt_method == "auto_gaussian_process":
+        return gp.auto_gaussian_process(f, f_args, x_0, **opt_args)
     return x_0
