@@ -1,4 +1,4 @@
-from optimization import optimize
+from optimization import optimize, Method
 import numpy as np
 from scipy.interpolate import CubicSpline
 from scipy.integrate import odeint
@@ -36,7 +36,7 @@ def cost_eval(u):
 
 
 if __name__ == "__main__":
-    h = optimize(cost_eval, None, opt_method="divided_rectangles", interval_low=np.zeros(20), interval_high=np.ones(20),
+    h = optimize(cost_eval, None, opt_method=Method.DIVIDED_RECTANGLES, interval_low=np.zeros(20), interval_high=np.ones(20),
                  value_tol=0.0001, size_tol=0.0001, max_steps=150)
     print(h)
     print(cost_eval(h))
