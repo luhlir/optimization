@@ -1,4 +1,4 @@
-from enum import Enum, auto
+from enum import Enum
 
 import firstOrderMethods as fom
 import secondOrderMethods as som
@@ -14,248 +14,287 @@ class Method(Enum):
     """
     Supported Methods for General Optimization
     """
-    GRADIENT_DESCENT = auto()
+    GRADIENT_DESCENT = fom.gradient_descent
     """
     Uses a simple gradient of the objective function to decide which direction to step in. Takes the following arguments:
-    f_prime - gradient of the objective function
-    fp_args - dictionary of immutable arguments for the gradient function
-    auto_diff - if True, will not use gradient function and will use automatic differentiation instead
-    max_steps - maximum number of steps to take before returning
-    tol - necessary distance to travel at each step before returning
-    lin_method - line search method used to determine step size
-    lin_args - dictionary of immutable arguments for the line search function
+    \nf_prime - gradient of the objective function
+    \nfp_args - dictionary of immutable arguments for the gradient function
+    \nauto_diff - if True, will not use gradient function and will use automatic differentiation instead
+    \nmax_steps - maximum number of steps to take before returning
+    \ntol - necessary distance to travel at each step before returning
+    \nlin_method - line search method used to determine step size
+    \nlin_args - dictionary of immutable arguments for the line search function
     """
-    CONJUGATE_DESCENT = auto()
+    CONJUGATE_DESCENT = fom.conjugate_descent
     """
     Uses previous gradient information to determine which direction to search. Takes the following arguments:
-    f_prime - gradient of the objective function
-    fp_args - dictionary of immutable arguments for the gradient function
-    auto_diff - if True, will not use gradient function and will use automatic differentiation instead
-    beta_method - "polak-ribiere" or "fletcher-reeves" for adding previous gradient information to direction
-    max_steps - maximum number of steps to take before returning
-    tol - necessary distance to travel at each step before returning
-    lin_method - line search method used to determine step size
-    lin_args - dictionary of immutable arguments for the line search function
+    \nf_prime - gradient of the objective function
+    \nfp_args - dictionary of immutable arguments for the gradient function
+    \nauto_diff - if True, will not use gradient function and will use automatic differentiation instead
+    \nbeta_method - "polak-ribiere" or "fletcher-reeves" for adding previous gradient information to direction
+    \nmax_steps - maximum number of steps to take before returning
+    \ntol - necessary distance to travel at each step before returning
+    \nlin_method - line search method used to determine step size
+    \nlin_args - dictionary of immutable arguments for the line search function
     """
-    MOMENTUM_DESCENT = auto()
+    MOMENTUM_DESCENT = fom.momentum_descent
     """
-    Conjugate Descent takes the following arguments:
+    Updates a momentum vector with gradient information to determine direction and size of each step. Takes the following arguments:
+    \nf_prime - gradient of the objective function
+    \nfp_args - dictionary of immutable arguments for the gradient function
+    \nauto_diff - if True, will not use gradient function and will use automatic differentiation instead
+    \nalpha - scalar for current gradient
+    \nbeta - scalar for previous momentum
+    \nmax_steps - maximum number of steps to take before returning
+    \ntol - necessary distance to travel at each step before returning
     """
-    NESTEROV_DESCENT = auto()
+    NESTEROV_DESCENT = fom.nesterov_descent
     """
-    Conjugate Descent takes the following arguments:
+    Updates a momentum vector with future gradient information to determine direction and size of each step. Takes the following arguments:
+    \nf_prime - gradient of the objective function
+    \nfp_args - dictionary of immutable arguments for the gradient function
+    \nauto_diff - if True, will not use gradient function and will use automatic differentiation instead
+    \nalpha - scalar for future gradient
+    \nbeta - scalar for previous momentum
+    \nmax_steps - maximum number of steps to take before returning
+    \ntol - necessary distance to travel at each step before returning
     """
-    ADAGRAD_DESCENT = auto()
+    ADAGRAD_DESCENT = fom.adagrad_descent
     """
-    Conjugate Descent takes the following arguments:
+    Updates a momentum vector with squared gradient to determine direction and size of each step. Takes the following arguments:
+    \nf_prime - gradient of the objective function
+    \nfp_args - dictionary of immutable arguments for the gradient function
+    \nauto_diff - if True, will not use gradient function and will use automatic differentiation instead
+    \nalpha - scalar for momentum and gradient toward step size
+    \nmax_steps - maximum number of steps to take before returning
+    \ntol - necessary distance to travel at each step before returning
     """
-    RMSPROP_DESCENT = auto()
+    RMSPROP_DESCENT = fom.rmsprop_descent
     """
-    Conjugate Descent takes the following arguments:
+    Updates a momentum vector using a weighted sum of previous momentum and gradient information to determine direction and size of each step
+    \nf_prime - gradient of the objective function
+    \nfp_args - dictionary of immutable arguments for the gradient function
+    \nauto_diff - if True, will not use gradient function and will use automatic differentiation instead
+    \nalpha - scalar for momentum towards step size
+    \ngamma - scalar for weight of momentum in momentum update
+    \nmax_steps - maximum number of steps to take before returning
+    \ntol - necessary distance to travel at each step before returning
     """
-    ADADELTA_DESCENT = auto()
+    ADADELTA_DESCENT = fom.adadelta_descent
     """
-    Conjugate Descent takes the following arguments:
+    Updates a momenum vector with two weighted sums of gradients and momentums to determine direction and size of each step. Takes the following arguments:
+    \nf_prime - gradient of the objective function
+    \nfp_args - dictionary of immutable arguments for the gradient function
+    \nauto_diff - if True, will not use gradient function and will use automatic differentiation instead
+    \ndelta - weight of previous step direction/size in step direction/size update
+    \ngamma - weight of previous momentum in momentum update
+    \nmax_steps - maximum number of steps to take before returning
+    \ntol - necessary distance to travel at each step before returning
     """
-    ADAM_DESCENT = auto()
+    ADAM_DESCENT = fom.adam_descent
     """
-    Conjugate Descent takes the following arguments:
+    Updates two momentum vectors that increase over time to determine direction and size of each step. Take the following arguments:
+    \nf_prime - gradient of the objective function
+    \nfp_args - dictionary of immutable arguments for the gradient function
+    \nauto_diff - if True, will not use gradient function and will use automatic differentiation instead
+    \nalpha - scalar for momentum in step direction/size
+    \ndelta - weight for current momentum in first momentum vector update
+    \ngamma - weight for current momentum in second momentum vector update
+    \nmax_steps - maximum number of steps to take before returning
+    \ntol - necessary distance to travel at each step before returning
     """
-    HYPERGRADIENT_DESCENT = auto()
+    HYPERGRADIENT_DESCENT = fom.hypergradient_descent
     """
-    Conjugate Descent takes the following arguments:
+    Uses previous gradient information to update scalar "alpha" to determine step size; steps in the direction of the gradient. Takes the following arguments:
+    \nf_prime - gradient of the objective function
+    \nfp_args - dictionary of immutable arguments for the gradient function
+    \nauto_diff - if True, will not use gradient function and will use automatic differentiation instead
+    \nalpha - initial step size value
+    \nmu - scalar used in step size update
+    \nmax_steps - maximum number of steps to take before returning
+    \ntol - necessary distance to travel at each step before returning
     """
-    NEWTONS_METHOD = auto()
+    NEWTONS_METHOD = som.newtons_method
     """
-    Conjugate Descent takes the following arguments:
+    Uses the gradient and inverse of the Hessian to determine a direction to search for a minimum on. Takes the following arguments:
+    \nf_prime - gradient function of the objective function
+    \nfp_args - dictionary of immutable arguments for the gradient function
+    \nf_dprime - Hessian function of the objective function
+    \nfdp_args - dictionary of immutable arguments for the Hessian function
+    \nauto_diff - if True, will not use gradient or Hessian functions and will use automatic differentiation instead
+    \nmax_steps - maximum number of steps to take before returning
+    \ntol - necessary distance to travel at each step before returning
+    \nlin_method - line search method to use
+    \nlin_args - dictionary of immutable arguments for the line search method
     """
-    QUASI_NEWTONS_METHOD = auto()
+    QUASI_NEWTONS_METHOD = som.quasi_newtons_method
     """
-    Conjugate Descent takes the following arguments:
+    Uses the gradient and an estimated inverse of the Hessian to determine a direction to search for a minimum in. Takes the following arguments:
+    \nf_prime - gradient function of the objective function
+    \nfp_args - dictionary of immutable arguments for the gradient function
+    \nauto_diff - if True, will not use gradient function and will use automatic differentiation instead
+    \nappr - inverse Hessian approximation method "dfp" or "???"
+    \nmax_steps - maximum number of steps to take before returning
+    \ntol - necessary distance to travel at each step before returning
+    \nlin_method - line search method to use
+    \nlin_args - dictionary of immutable arguments for the line search method
     """
-    COORDINATE_DESCENT = auto()
-    """
-    Conjugate Descent takes the following arguments:
-    """
-    POWELLS_METHOD = auto()
-    """
-    Conjugate Descent takes the following arguments:
-    """
-    HOOKE_JEEVES_METHOD = auto()
-    """
-    Conjugate Descent takes the following arguments:
-    """
-    PATTERN_SEARCH = auto()
-    """
-    Conjugate Descent takes the following arguments:
-    """
-    NELDER_MEAD_SIMPLEX = auto()
-    """
-    Conjugate Descent takes the following arguments:
-    """
-    DIVIDED_RECTANGLES = auto()
-    """
-    Conjugate Descent takes the following arguments:
-    """
-    NOISY_DESCENT = auto()
-    """
-    Conjugate Descent takes the following arguments:
-    """
-    MESH_ADAPTIVE_SEARCH = auto()
-    """
-    Conjugate Descent takes the following arguments:
-    """
-    SIMULATED_ANNEALING = auto()
-    """
-    Conjugate Descent takes the following arguments:
-    """
-    CORANA_ANNEALING = auto()
-    """
-    Conjugate Descent takes the following arguments:
-    """
-    CROSS_ENTROPY = auto()
-    """
-    Conjugate Descent takes the following arguments:
-    """
-    COVARIANCE_MATRIX_ADAPTATION = auto()
-    """
-    Conjugate Descent takes the following arguments:
-    """
-    GENETIC_METHOD = auto()
-    """
-    Conjugate Descent takes the following arguments:
-    """
-    DIFFERENTIAL_EVOLUTION = auto()
-    """
-    Conjugate Descent takes the following arguments:
-    """
-    PARTICLE_SWARM = auto()
-    """
-    Conjugate Descent takes the following arguments:
-    """
-    FIREFLY_METHOD = auto()
-    """
-    Conjugate Descent takes the following arguments:
-    """
-    CUCKOO_SEARCH = auto()
-    """
-    Conjugate Descent takes the following arguments:
-    """
-    HYPERRECTANGLE_CONSTRAINT = auto()
+    COORDINATE_DESCENT = zom.coordinate_descent
     """
     Conjugate Descent takes the following arguments:
     """
-    PENALTY_CONSTRAINT = auto()
+    POWELLS_METHOD = zom.powells_method
     """
     Conjugate Descent takes the following arguments:
     """
-    AUGMENTED_LAGRANGE = auto()
+    HOOKE_JEEVES_METHOD = zom.hooke_jeeves_method
     """
     Conjugate Descent takes the following arguments:
     """
-    INTERIOR_POINT_METHOD = auto()
+    PATTERN_SEARCH = zom.pattern_search
     """
     Conjugate Descent takes the following arguments:
     """
-    NAIVE_PARETO = auto()
+    NELDER_MEAD_SIMPLEX = zom.nelder_mead_simplex
     """
     Conjugate Descent takes the following arguments:
     """
-    WEIGHTED_PARETO_METHOD = auto()
+    DIVIDED_RECTANGLES = zom.divided_rectangles
     """
     Conjugate Descent takes the following arguments:
     """
-    WEIGHTED_PARETO_SCAN_METHOD = auto()
+    NOISY_DESCENT = stm.noisy_descent
     """
     Conjugate Descent takes the following arguments:
     """
-    GOAL_METHOD = auto()
+    MESH_ADAPTIVE_SEARCH = stm.mesh_adaptive_search
     """
     Conjugate Descent takes the following arguments:
     """
-    WEIGHTED_GOAL_METHOD = auto()
+    SIMULATED_ANNEALING = stm.simulated_annealing
     """
     Conjugate Descent takes the following arguments:
     """
-    WEIGHTED_GOAL_SCAN_METHOD = auto()
+    CORANA_ANNEALING = stm.corana_annealing
     """
     Conjugate Descent takes the following arguments:
     """
-    WEIGHTED_MIN_MAX_METHOD = auto()
+    CROSS_ENTROPY = stm.cross_entropy
     """
     Conjugate Descent takes the following arguments:
     """
-    WEIGHTED_MIN_MAX_SCAN_METHOD = auto()
+    COVARIANCE_MATRIX_ADAPTATION = stm.covariance_matrix_adaptation
     """
     Conjugate Descent takes the following arguments:
     """
-    EXPONENTIAL_WEIGHT_METHOD = auto()
+    GENETIC_METHOD = pop.genetic_method
     """
     Conjugate Descent takes the following arguments:
     """
-    EXPONENTIAL_WEIGHT_SCAN_METHOD = auto()
+    DIFFERENTIAL_EVOLUTION = pop.differential_evolution
     """
     Conjugate Descent takes the following arguments:
     """
-    VECTOR_EVALUATED_GENETIC_METHOD = auto()
+    PARTICLE_SWARM = pop.particle_swarm
     """
     Conjugate Descent takes the following arguments:
     """
-    AUTO_GAUSSIAN_PROCESS = auto()
+    FIREFLY_METHOD = pop.firefly_method
+    """
+    Conjugate Descent takes the following arguments:
+    """
+    CUCKOO_SEARCH = pop.cuckoo_search
+    """
+    Conjugate Descent takes the following arguments:
+    """
+    HYPERRECTANGLE_CONSTRAINT = con.hyperrectangle_constraint
+    """
+    Conjugate Descent takes the following arguments:
+    """
+    PENALTY_CONSTRAINT = con.penalty_constraint
+    """
+    Conjugate Descent takes the following arguments:
+    """
+    AUGMENTED_LAGRANGE = con.augmented_lagrange
+    """
+    Conjugate Descent takes the following arguments:
+    """
+    INTERIOR_POINT_METHOD = con.interior_point_method
+    """
+    Conjugate Descent takes the following arguments:
+    """
+    NAIVE_PARETO = mul.naive_pareto
+    """
+    Conjugate Descent takes the following arguments:
+    """
+    WEIGHTED_PARETO_METHOD = mul.weighted_pareto_method
+    """
+    Conjugate Descent takes the following arguments:
+    """
+    WEIGHTED_PARETO_SCAN_METHOD = mul.weighted_pareto_scan_method
+    """
+    Conjugate Descent takes the following arguments:
+    """
+    GOAL_METHOD = mul.goal_method
+    """
+    Conjugate Descent takes the following arguments:
+    """
+    WEIGHTED_GOAL_METHOD = mul.weighted_goal_method
+    """
+    Conjugate Descent takes the following arguments:
+    """
+    WEIGHTED_GOAL_SCAN_METHOD = mul.weighted_goal_scan_method
+    """
+    Conjugate Descent takes the following arguments:
+    """
+    WEIGHTED_MIN_MAX_METHOD = mul.weighted_min_max_method
+    """
+    Conjugate Descent takes the following arguments:
+    """
+    WEIGHTED_MIN_MAX_SCAN_METHOD = mul.weighted_min_max_scan_method
+    """
+    Conjugate Descent takes the following arguments:
+    """
+    EXPONENTIAL_WEIGHT_METHOD = mul.exponential_weight_method
+    """
+    Conjugate Descent takes the following arguments:
+    """
+    EXPONENTIAL_WEIGHT_SCAN_METHOD = mul.exponential_weight_scan_method
+    """
+    Conjugate Descent takes the following arguments:
+    """
+    VECTOR_EVALUATED_GENETIC_METHOD = pop.vector_evaluated_genetic_method
+    """
+    Conjugate Descent takes the following arguments:
+    """
+    AUTO_GAUSSIAN_PROCESS = gp.auto_gaussian_process
     """
     Conjugate Descent takes the following arguments:
     """
 
 
 def optimize(f, x_0, f_args={}, opt_method=Method.GRADIENT_DESCENT, **opt_args):
+    """
+    Attempts to find a locally minimum design point of the design point using the specified optimization method
 
+    :param f: design point
+    :param x_0: initial design point if the optimization method takes one. None is acceptable if using upper/lower bounds
+    :param f_args: dictionary of immutable arguments for the objective function
+    :param opt_method: Method enum being used for the optimization
+    :param opt_args: any extra arguments that the optimization method takes
+    :return: a likely locally minimum design point
+    """
+
+    # Some methods don't take the same order of arguments, so they need to be handled specially
+    if f_args is None:
+        f_args = {}
     match opt_method:
-        case Method.GRADIENT_DESCENT:
-            return fom.gradient_descent(f, x_0, f_args, **opt_args)
-        case Method.CONJUGATE_DESCENT:
-            return fom.conjugate_descent(f, x_0, f_args, **opt_args)
-        case Method.MOMENTUM_DESCENT:
-            return fom.momentum_descent(f, x_0, f_args, **opt_args)
-        case Method.NESTEROV_DESCENT:
-            return fom.momentum_descent(f, x_0, f_args, **opt_args)
-        case Method.ADAGRAD_DESCENT:
-            return fom.momentum_descent(f, x_0, f_args, **opt_args)
-        case Method.RMSPROP_DESCENT:
-            return fom.momentum_descent(f, x_0, f_args, **opt_args)
-        case Method.ADADELTA_DESCENT:
-            return fom.momentum_descent(f, x_0, f_args, **opt_args)
-        case Method.ADAM_DESCENT:
-            return fom.momentum_descent(f, x_0, f_args, **opt_args)
-        case Method.HYPERGRADIENT_DESCENT:
-            return fom.momentum_descent(f, x_0, f_args, **opt_args)
-        case Method.NEWTONS_METHOD:
-            return som.newtons_method(f, x_0, f_args, **opt_args)
-        case Method.QUASI_NEWTONS_METHOD:
-            return som.quasi_newtons_method(f, x_0, f_args, **opt_args)
-        case Method.COORDINATE_DESCENT:
-            return zom.coordinate_descent(f, x_0, f_args, **opt_args)
-        case Method.POWELLS_METHOD:
-            return zom.powells_method(f, x_0, f_args, **opt_args)
-        case Method.HOOKE_JEEVES_METHOD:
-            return zom.hooke_jeeves_method(f, x_0, f_args, **opt_args)
-        case Method.PATTERN_SEARCH:
-            return zom.pattern_search(f, x_0, f_args, **opt_args)
         case Method.NELDER_MEAD_SIMPLEX:
             return zom.nelder_mead_simplex(f, f_args, x_0=x_0, **opt_args)
         case Method.DIVIDED_RECTANGLES:
             return zom.divided_rectangles(f, f_args, **opt_args)
-        case Method.NOISY_DESCENT:
-            return stm.noisy_descent(f, x_0, f_args, **opt_args)
-        case Method.MESH_ADAPTIVE_SEARCH:
-            return stm.mesh_adaptive_search(f, x_0, f_args, **opt_args)
-        case Method.SIMULATED_ANNEALING:
-            return stm.simulated_annealing(f, x_0, f_args, **opt_args)
-        case Method.CORANA_ANNEALING:
-            return stm.corana_annealing(f, x_0, f_args, **opt_args)
         case Method.CROSS_ENTROPY:
             return stm.cross_entropy(f, f_args, x_0=x_0, **opt_args)
-        case Method.COVARIANCE_MATRIX_ADAPTATION:
-            return stm.covariance_matrix_adaptation(f, x_0, f_args, **opt_args)
         case Method.GENETIC_METHOD:
             return pop.genetic_method(f, f_args, x_0=x_0, **opt_args)
         case Method.DIFFERENTIAL_EVOLUTION:
@@ -266,37 +305,11 @@ def optimize(f, x_0, f_args={}, opt_method=Method.GRADIENT_DESCENT, **opt_args):
             return pop.firefly_method(f, f_args, x_0=x_0, **opt_args)
         case Method.CUCKOO_SEARCH:
             return pop.cuckoo_search(f, f_args, x_0=x_0, **opt_args)
-        case Method.HYPERRECTANGLE_CONSTRAINT:
-            return con.hyperrectangle_constraint(f, x_0, f_args, **opt_args)
-        case Method.PENALTY_CONSTRAINT:
-            return con.penalty_constraint(f, x_0, f_args, **opt_args)
-        case Method.AUGMENTED_LAGRANGE:
-            return con.augmented_lagrange(f, x_0, f_args, **opt_args)
-        case Method.INTERIOR_POINT_METHOD:
-            return con.interior_point_method(f, x_0, f_args, **opt_args)
         case Method.NAIVE_PARETO:
             return mul.naive_pareto(f, f_args, x_0=x_0, **opt_args)
-        case Method.WEIGHTED_PARETO_METHOD:
-            return mul.weighted_pareto_method(f, x_0, f_args, **opt_args)
-        case Method.WEIGHTED_PARETO_SCAN_METHOD:
-            return mul.weighted_pareto_scan_method(f, x_0, f_args, **opt_args)
-        case Method.GOAL_METHOD:
-            return mul.goal_method(f, x_0, f_args, **opt_args)
-        case Method.WEIGHTED_GOAL_METHOD:
-            return mul.weighted_goal_method(f, x_0, f_args, **opt_args)
-        case Method.WEIGHTED_GOAL_SCAN_METHOD:
-            return mul.weighted_goal_scan_method(f, x_0, f_args, **opt_args)
-        case Method.WEIGHTED_MIN_MAX_METHOD:
-            return mul.weighted_min_max_method(f, x_0, f_args, **opt_args)
-        case Method.WEIGHTED_MIN_MAX_SCAN_METHOD:
-            return mul.weighted_min_max_scan_method(f, x_0, f_args, **opt_args)
-        case Method.EXPONENTIAL_WEIGHT_METHOD:
-            return mul.exponential_weight_method(f, x_0, f_args, **opt_args)
-        case Method.EXPONENTIAL_WEIGHT_SCAN_METHOD:
-            return mul.exponential_weight_scan_method(f, x_0, f_args, **opt_args)
         case Method.VECTOR_EVALUATED_GENETIC_METHOD:
             return pop.vector_evaluated_genetic_method(f, f_args, x_0=x_0, **opt_args)
         case Method.AUTO_GAUSSIAN_PROCESS:
             return gp.auto_gaussian_process(f, f_args, x_0, **opt_args)
         case _:
-            return x_0
+            return opt_method.__call__(f, x_0, f_args, **opt_args)

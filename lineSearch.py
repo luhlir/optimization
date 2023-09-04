@@ -1,41 +1,11 @@
+from enum import Enum
+
 import numpy as np
-import bracket
+from bracket import Bracket, bracket_minimum
 from gradientGroup import GradientGroup as gg
 
 
-def line_search(f, x, f_args, d, method="strong_backtrack_search", lin_args=None):
-    """
-    Performs the input line search method
-
-    :param f: objective function to search
-    :param x: design point to search around
-    :param f_args: dictionary of immutable arguments for the objective function
-    :param d: direction to search in
-    :param method: line search method
-    :param lin_args: dictionary of immutable arguments for the line search method
-    :return: a good candidate design point satisfying x' = x + a * d
-    """
-    if len(x) != len(d):
-        return x
-    if lin_args is None:
-        lin_args = {}
-
-    if method == "full_search":
-        a = full_search(f, x, f_args, d, **lin_args)
-    elif method == "fix_step":
-        a = fix_search(**lin_args)
-    elif method == "decaying_step":
-        a = decaying_search(**lin_args) # Make some better global constants to implement this?
-    elif method == "backtrack_search":
-        a = backtrack_search(f, x, f_args, d, **lin_args)
-    elif method == "strong_backtrack_search":
-        a = strong_backtrack_search(f, x, f_args, d, **lin_args)
-    else:
-        a = 0
-    return x + a * d
-
-
-def full_search(f, x, f_args, d, brac_method="golden_section_search", brac_args=None, min_args=None):
+def full_search(f, x, f_args, d, brac_method=Bracket.GOLDEN_SECTION_SEARCH, brac_args={}, min_args={}):
     """
     Performs a full search using a bracketing method to detect a local minimum on the given line
 
@@ -48,30 +18,28 @@ def full_search(f, x, f_args, d, brac_method="golden_section_search", brac_args=
     :param min_args: dictionary of immutable arguments for determining a good initial guess
     :return: a scalar describing the step size to take in the given direction
     """
-    if brac_args is None:
-        brac_args = {}
-    if min_args is None:
-        min_args = {}
-
     def f_wrap(a):
         return f(x + a * d, **f_args)
 
-    b, c = bracket.bracket_minimum(f_wrap, **min_args)
-    if brac_method == "golden_section_search":
-        y, z = bracket.golden_section_search(f_wrap, b, c, **brac_args)
-    elif brac_method == "quadratic_fit_search":
-        y, z = bracket.quadratic_fit_search(f_wrap, b, c, **brac_args)
-    else:
-        y, z = b, c
+    b, c = bracket_minimum(f_wrap, **min_args)
+    match brac_method:
+        case Bracket.BRACKET_MINIMUM:
+            y, z = b, c
+        case _:
+            y, z = brac_method.__call__(f_wrap, b, c, **brac_args)
     return (y + z) / 2
 
 
-def fix_search(alpha):
+def fix_search(f, x, f_args, d, alpha):
     """
-    Redundant.. returns the input. Fixed step size
+    Fixed step size
 
-    :param alpha: step size
-    :return: scalar describing the step size to take in the given direction
+    :param f: unused
+    :param x: unused
+    :param f_args: unused
+    :param d: unused
+    :param alpha: the step size to take
+    :return: the step size to take
     """
     return alpha
 
@@ -79,19 +47,23 @@ def fix_search(alpha):
 global k
 
 
-def decaying_search(alpha, decay):
+def decaying_search(f, x, f_args, d, alpha, decay):
     """
-    Decreases the step size at each step
+    Decreases the step distance each time it's called
 
+    :param f: unused
+    :param x: unused
+    :param f_args: unused
+    :param d: unused
     :param alpha: initial step size
-    :param decay: scalar to decrease step size by at each step
-    :return: scalar describing the step size to take in the given direction
+    :param decay: multiplicative decay each step
+    :return: the step size to take this time
     """
     k += 1
     return alpha * (decay ** k)   # TODO: Better way to do this? <--- pass in the step size as an argument. use dictionary in upper levels
 
 
-def backtrack_search(f, x, f_args, d, f_prime=None, fp_args=None, auto_diff=True, alpha=1, p=0.5, beta=0.0001,
+def backtrack_search(f, x, f_args, d, f_prime=None, fp_args={}, auto_diff=True, alpha=1, p=0.5, beta=0.0001,
                      max_steps=20):
     """
     Uses function values to find point that is likely to be minimal on the line based on the gradient
@@ -111,8 +83,6 @@ def backtrack_search(f, x, f_args, d, f_prime=None, fp_args=None, auto_diff=True
     """
     if p > 1:
         p = 1 / p
-    if fp_args is None:
-        fp_args = {}
 
     if auto_diff:
         res = f(gg.make_gradient_groups(x), **f_args)
@@ -130,7 +100,7 @@ def backtrack_search(f, x, f_args, d, f_prime=None, fp_args=None, auto_diff=True
     return alpha
 
 
-def strong_backtrack_search(f, x, f_args, d, f_prime=None, fp_args=None, auto_diff=True, alpha=1, p=0.5, beta=0.0001,
+def strong_backtrack_search(f, x, f_args, d, f_prime=None, fp_args={}, auto_diff=True, alpha=1, p=0.5, beta=0.0001,
                             sig=0.1, max_steps=20):
     """
     Performs a backtrack search that uses the strong Wolfe conditions to detect a local minimum on the line
@@ -153,8 +123,6 @@ def strong_backtrack_search(f, x, f_args, d, f_prime=None, fp_args=None, auto_di
         p = 1 / p
     if max_steps <= 0:
         return 0
-    if fp_args is None:
-        fp_args = {}
 
     if auto_diff:
         res = f(gg.make_gradient_groups(x), **f_args)
@@ -225,3 +193,66 @@ def strong_backtrack_search(f, x, f_args, d, f_prime=None, fp_args=None, auto_di
             last_alpha = midpoint
         max_steps -= 1
     return midpoint
+
+
+class Search(Enum):
+    FULL_SEARCH = full_search
+    """
+    Performs a full search using a bracketing method to detect a local minimum on the given line. Takes the following arguments:
+    \nbrac_method - bracketing method to use in the search
+    \nbrac_args - dictionary of immutable arguments for the bracketing method
+    \nmin_args - dictionary of immutable arguments for determining a good initial guess
+    """
+    FIX_SEARCH = fix_search
+    """
+    Fixed step size. Takes the following arguments:
+    \nalpha - the step size to take
+    """
+    DECAYING_SEARCH = decaying_search
+    """
+    Decreases the step distance each time it's called. Takes the following arguments:
+    \nalpha - initial step size
+    \ndecay - multiplicative decay each step
+    """
+    BACKTRACK_SEARCH = backtrack_search
+    """
+    Uses function values to find point that is likely to be minimal on the line based on the gradient. Takes the following arguments:
+    \nf_prime - gradient method of f
+    \nfp_args - dictionary of immutable arguments to f_prime
+    \nauto_diff - use automatic differentiation instead of an explicit gradient method
+    \nalpha - initial step size
+    \np - step size correction factor <1 used at each step
+    \nbeta - scalar for expected change in function value
+    \nmax_steps - maximum number of function evaluations to take
+    """
+    STRONG_BACKTRACK_SEARCH = strong_backtrack_search
+    """
+    Performs a backtrack search that uses the strong Wolfe conditions to detect a local minimum on the line. Takes the following arguments:
+    \nf_prime - gradient method of f
+    \nfp_args - dictionary of immutable arguments to f_prime
+    \nauto_diff - use automatic differentiation instead of an explicit gradient method
+    \nalpha - initial step size
+    \np - step size correction factor <1 used at each step in bracketing phase
+    \nbeta - scalar for expected change in function value
+    \nsig - scalar used in zoom phase
+    \nmax_steps - maximum number of function calls to make
+    """
+
+
+def line_search(f, x, f_args, d, method=Search.STRONG_BACKTRACK_SEARCH, lin_args={}):
+    """
+    Performs the input line search method
+
+    :param f: objective function to search
+    :param x: design point to search around
+    :param f_args: dictionary of immutable arguments for the objective function
+    :param d: direction to search in
+    :param method: line search method
+    :param lin_args: dictionary of immutable arguments for the line search method
+    :return: a good candidate design point satisfying x' = x + a * d
+    """
+    if len(x) != len(d):
+        return x
+
+    a = method.__call__(f, x, f_args, d, **lin_args)
+    return x + a * d

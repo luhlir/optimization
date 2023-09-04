@@ -1,8 +1,9 @@
-import numpy as np
+from enum import Enum
 
 
 def bracket_minimum(f, step=1, growth=2, max_steps=20):
-    """Guarantees a local min of f is between the returned values. Does not guarantee a small bracket.
+    """
+    Guarantees a local min of f is between the returned values. Does not guarantee a small bracket.
 
     :param f: Function takes a constant input and returns a constant output
     :param step: Initial step size
@@ -35,7 +36,8 @@ def bracket_minimum(f, step=1, growth=2, max_steps=20):
 
 
 def golden_section_search(f, lower, upper, steps=10):
-    """Uses the golden ration to shrink the bracket at each step
+    """
+    Uses the golden ration to shrink the bracket at each step
 
     :param f: Function that takes a constant input and returns a constant output
     :param lower: Constant lower bound of bracket
@@ -62,7 +64,8 @@ def golden_section_search(f, lower, upper, steps=10):
 
 
 def quadratic_fit_search(f, a, b, c=None, steps=10):
-    """Interpolates a quadratic function around a, b, and c and brackets that min.
+    """
+    Interpolates a quadratic function around a, b, and c and brackets that min.
 
     a < b (< c if it is not None)
 
@@ -98,3 +101,28 @@ def quadratic_fit_search(f, a, b, c=None, steps=10):
         steps -= 1
     return a, c
 
+
+class Bracket(Enum):
+    BRACKET_MINIMUM = bracket_minimum
+    """
+    Guarantees a local min of f is between the returned values. Does not guarantee a small bracket. Takes the following arguments:
+    \nstep - Initial step size
+    \ngrowth - Growth factor by which the step increases
+    \nmax_steps - Maximum number of function calls, in case no local min exists (>2)
+    """
+    GOLDEN_SECTION_SEARCH = golden_section_search
+    """
+    Uses the golden ration to shrink the bracket at each step. Takes the following arguments:
+    \nlower - Constant lower bound of bracket
+    \nupper - Constant upper bound of bracket
+    \nsteps - Number of function calls (>1)
+    """
+    QUADRATIC_FIT_SEARCH = quadratic_fit_search
+    """
+    Interpolates a quadratic function around a, b, and c and brackets that min. Takes the following arguments:
+    \nf - Function that takes a constant input and returns a constant output
+    \na - Point around local min
+    \nb - Point around local min (> a)
+    \nc - Point around local min (> b), defaults to midpoint of a and b
+    \nsteps - Number of function calls (>3)
+    """
